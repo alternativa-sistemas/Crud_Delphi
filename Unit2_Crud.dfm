@@ -10,7 +10,9 @@ object Form2: TForm2
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  OldCreateOrder = True
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 15
   object Label1: TLabel
     Left = 16
@@ -331,5 +333,28 @@ object Form2: TForm2
     DataSet = FDContatos
     Left = 248
     Top = 384
+  end
+  object FDQueryContatos: TFDQuery
+    Connection = FDConnection1
+    SQL.Strings = (
+      'CREATE TABLE Contatos ('
+      '  ID COUNTER,'
+      '  NOME VARCHAR,'
+      '  TELEFONE VARCHAR,'
+      '  OBSERVACOES VARCHAR,'
+      '  EMAIL VARCHAR,'
+      '  CONSTRAINT PK PRIMARY KEY (Id)'
+      ')')
+    Left = 344
+    Top = 384
+  end
+  object FDMSAccessService1: TFDMSAccessService
+    DriverLink = FDPhysMSAccessDriverLink1
+    Left = 688
+    Top = 320
+  end
+  object FDPhysMSAccessDriverLink1: TFDPhysMSAccessDriverLink
+    Left = 688
+    Top = 376
   end
 end

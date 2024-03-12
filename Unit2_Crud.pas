@@ -9,7 +9,7 @@ uses
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
   FireDAC.Phys.MSAcc, FireDAC.Phys.MSAccDef, FireDAC.VCLUI.Wait,
   FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, Data.DB,
-  FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.Buttons;
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.Buttons, FireDAC.Phys.ODBCBase;
 
 type
   TForm2 = class(TForm)
@@ -38,6 +38,9 @@ type
     Btn_Cancelar: TButton;
     Procurar: TEdit;
     SpeedButton1: TSpeedButton;
+    FDQueryContatos: TFDQuery;
+    FDMSAccessService1: TFDMSAccessService;
+    FDPhysMSAccessDriverLink1: TFDPhysMSAccessDriverLink;
     procedure Btn_proximoClick(Sender: TObject);
     procedure Btn_anteriorClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -64,6 +67,9 @@ var
   estado: integer;
 
 implementation
+
+uses
+  System.IOUtils;
 
 {$R *.dfm}
 
@@ -98,16 +104,16 @@ end;
 
 procedure TForm2.carregar;
 begin
-  txt_Id.Text       := fdcontatos.FieldByName('Id').Value;
-  txt_Nome.Text     := fdcontatos.FieldByName('Nome').Value;
-  txt_Telefone.Text := fdcontatos.FieldByName('Telefone').Value;
-  txt_Email.Text    := fdcontatos.FieldByName('Email').Value;
-  txt_Obs.Text      := fdcontatos.FieldByName('Observações').Value;
+  txt_Id.Text       := fdcontatos.FieldByName('Id').AsString;
+  txt_Nome.Text     := fdcontatos.FieldByName('Nome').AsString;
+  txt_Telefone.Text := fdcontatos.FieldByName('Telefone').AsString;
+  txt_Email.Text    := fdcontatos.FieldByName('Email').AsString;
+  txt_Obs.Text      := fdcontatos.FieldByName('Observacoes').AsString;
 
-  if fdcontatos.FieldByName('Observações').Value = NULL then
+  if fdcontatos.FieldByName('Observacoes').Value = NULL then
     txt_Obs.Text := ''
   else
-    txt_Obs.Text := fdcontatos.FieldByName('Observações').Value;
+    txt_Obs.Text := fdcontatos.FieldByName('Observacoes').Value;
 
 end;
 
@@ -116,13 +122,25 @@ begin
   fdcontatos.FieldByName('Nome').Value          :=  txt_Nome.Text;
   fdcontatos.FieldByName('Telefone').Value      :=  txt_Telefone.Text;
   fdcontatos.FieldByName('Email').Value         :=  txt_Email.Text;
-  fdcontatos.FieldByName('Observações').Value   :=  txt_Obs.Text;
+  fdcontatos.FieldByName('Observacoes').Value   :=  txt_Obs.Text;
 end;
 
 procedure TForm2.FormCreate(Sender: TObject);
+var
+  Database: string;
 begin
-    fdconnection1.Params.Database :=  (GetCurrentDir+'\Assets\Contatos.mdb');
+  Database := (GetCurrentDir+'\Assets\Contatos.mdb');
+  try
+    ForceDirectories(TPath.GetDirectoryName(Database));
+    FDMSAccessService1.Database := Database;
+    FDMSAccessService1.DBVersion := avDefault;
+    FDMSAccessService1.CreateDB;
+  except end;
+    fdconnection1.Params.Database := Database;
     fdconnection1.Connected       := true;
+  try
+    FDQueryContatos.Execute;
+  except end;
     fdcontatos.TableName          := 'contatos';
     fdcontatos.Active             := true;
 
